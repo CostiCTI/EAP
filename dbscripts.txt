@@ -1,0 +1,54 @@
+CREATE TABLE `Users` (
+  `userid` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  PRIMARY KEY (`userid`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COMMENT='Users table'
+
+
+CREATE TABLE `Tasks` (
+  `taskid` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `descrition` varchar(100) NOT NULL,
+  `answer` varchar(100) NOT NULL,
+  `challangeid` int(11) NOT NULL,
+  PRIMARY KEY (`taskid`),
+  KEY `Tasks_FK` (`challangeid`),
+  CONSTRAINT `Tasks_FK` FOREIGN KEY (`challangeid`) REFERENCES `Challenges` (`challengeid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COMMENT='Tasks description'
+
+
+CREATE TABLE `Challenges` (
+  `challengeid` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) DEFAULT NULL,
+  `description` varchar(100) NOT NULL,
+  `difficulty` int(11) NOT NULL,
+  `xp` int(11) NOT NULL,
+  `answer` varchar(100) NOT NULL,
+  PRIMARY KEY (`challengeid`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COMMENT='Challenges table'
+
+
+CREATE TABLE `Solvedtasks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `idUser` int(11) NOT NULL,
+  `idTask` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Solvedtasks_FK` (`idUser`),
+  KEY `Solvedtasks_FK_1` (`idTask`),
+  CONSTRAINT `Solvedtasks_FK` FOREIGN KEY (`idUser`) REFERENCES `Users` (`userid`),
+  CONSTRAINT `Solvedtasks_FK_1` FOREIGN KEY (`idTask`) REFERENCES `Tasks` (`taskid`)
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COMMENT='Solved tasks table'
+
+
+CREATE TABLE `Solvedchallenges` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `idUser` int(11) NOT NULL,
+  `idChallenge` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Solvedtasks_FK` (`idUser`) USING BTREE,
+  KEY `Solvedtasks_FK_1` (`idChallenge`) USING BTREE,
+  CONSTRAINT `Solvedchallenges_FK` FOREIGN KEY (`idUser`) REFERENCES `Users` (`userid`),
+  CONSTRAINT `Solvedchallenges_FK_1` FOREIGN KEY (`idChallenge`) REFERENCES `Challenges` (`challengeid`)
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COMMENT='Solved tasks table'
