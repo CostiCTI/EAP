@@ -85,6 +85,107 @@ class Test(unittest.TestCase):
         rv = self.appx.post('/answer', json={'userid': '1', 'taskid': '1', 'answer': '100'})
         self.assertEqual(rv.status, '200 OK')
 
+    def test_get_answer_resp(self):
+        rv = self.appx.post('/answer', json={'userid': '1', 'taskid': '1', 'answer': '100'})
+        data = json.loads(rv.data)
+        ans = {'result': {'answer': 0}}
+        self.assertEqual(data, ans)
+
+    def test_get_answer_status2(self):
+        rv = self.appx.post('/answer', json={'userid': '2', 'taskid': '2', 'answer': '100'})
+        self.assertEqual(rv.status, '200 OK')
+
+    def test_get_answer_resp3(self):
+        rv = self.appx.post('/answer', json={'userid': '1', 'taskid': '2', 'answer': '100'})
+        data = json.loads(rv.data)
+        ans = {'result': {'answer': 0}}
+        self.assertEqual(data, ans)
+
+    def test_get_answer_status3(self):
+        rv = self.appx.post('/answer', json={'userid': '1', 'taskid': '2', 'answer': '100'})
+        self.assertEqual(rv.status, '200 OK')
+
+    def test_get_answer_resp2(self):
+        rv = self.appx.post('/answer', json={'userid': '2', 'taskid': '2', 'answer': '100'})
+        data = json.loads(rv.data)
+        ans = {'result': {'answer': 0}}
+        self.assertEqual(data, ans)
+
+    def test_get_chanswer_status(self):
+        rv = self.appx.post('/chanswer', json={'userid': '1', 'challengeid': '1', 'answer': '100'})
+        self.assertEqual(rv.status, '200 OK')
+
+    def test_get_chanswer_resp(self):
+        rv = self.appx.post('/chanswer', json={'userid': '1', 'challengeid': '1', 'answer': 'abc'})
+        data = json.loads(rv.data)
+        ans = {'result': {'answer': 0}}
+        self.assertEqual(data, ans)
+
+    def test_get_chanswer_resp2(self):
+        rv = self.appx.post('/chanswer', json={'userid': '1', 'challengeid': '1', 'answer': '123'})
+        data = json.loads(rv.data)
+        ans = {'result': {'answer': 1}}
+        self.assertEqual(data, ans)
+
+    def test_get_chanswer_resp3(self):
+        rv = self.appx.post('/chanswer', json={'userid': '2', 'challengeid': '1', 'answer': '123'})
+        data = json.loads(rv.data)
+        ans = {'result': {'answer': 1}}
+        self.assertEqual(data, ans)
+
+
+    def test_get_login_status(self):
+        rv = self.appx.post('/users/login', json={'email': 'x@x.com', 'password': '1234'})
+        self.assertEqual(rv.status, '200 OK')
+
+    def test_get_login_resp(self):
+        rv = self.appx.post('/users/login', json={'email': 'x@x.com', 'password': '1234'})
+        self.assertNotEqual(None, rv.data)
+
+    def test_get_login_resp2(self):
+        rv = self.appx.post('/users/login', json={'email': 'a@a.com', 'password': '1111'})
+        self.assertNotEqual(None, rv.data)
+
+    def test_get_register_status(self):
+        rv = self.appx.post('/users/register', json={'email': 'x@x.com', 'username': 'abc'})
+        self.assertEqual(rv.status, '200 OK')
+
+    def test_get_registers_resp(self):
+        rv = self.appx.post('/users/register', json={'email': 'x@x.com', 'username': 'abc'})
+        data = json.loads(rv.data)
+        res = {"result": {"email":"*", "username":"abc"}}
+        self.assertEqual(res, data)
+
+    def test_get_registers_resp2(self):
+        rv = self.appx.post('/users/register', json={'email': 'a@a.com', 'username': 'name'})
+        data = json.loads(rv.data)
+        res = {"result": {"email":"*", "username":"name"}}
+        self.assertEqual(res, data)
+
+    def test_get_top(self):
+        res = sql_server.get_top()
+        l = res['result']
+        is_reversed = True
+        for i in range(len(l) - 1):
+            if l[i][1] < l[i+1][1]:
+                is_reversed = False
+        self.assertTrue(is_reversed)
+
+    def test_calculate_level_1(self):
+        level = sql_server.calculate_level(0)
+        self.assertEqual(level, 0)
+        level = sql_server.calculate_level(5)
+        self.assertEqual(level, 1)
+        level = sql_server.calculate_level(300)
+        self.assertEqual(level, 5)
+        level = sql_server.calculate_level(324)
+        self.assertEqual(level, 5)
+        level = sql_server.calculate_level(325)
+        self.assertEqual(level, 6)
+        level = sql_server.calculate_level(1000)
+        self.assertEqual(level, 9)
+
+
 
 if __name__ == '__main__':
     unittest.main()
