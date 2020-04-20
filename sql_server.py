@@ -109,6 +109,56 @@ def get_solved_challenges():
 	return result
 
 
+@app.route('/stats', methods=['GET', 'POST'])
+def get_stats():
+	print (request.get_json())
+	print (request.args)
+	userid = request.get_json()['userid']
+	mycursor.execute("SELECT * FROM Solvedchallenges WHERE idUser = " + str(userid))
+	rv = mycursor.fetchall()
+	chs = [x[2] for x in rv]
+	print (chs)
+	xp = 0
+	stars = 0
+	level = 1
+	names = []
+	mycursor.execute("SELECT * FROM Challenges")
+	rv = mycursor.fetchall()
+	for x in rv:
+		if x[0] in chs:
+			xp += x[4]
+			stars += x[3]
+			names.append(x[1])
+	if xp < 25:
+		level = 1
+	elif xp < 50:
+		level = 2
+	elif xp < 100:
+		level = 3
+	elif xp < 200:
+		level = 4
+	elif xp < 350:
+		level = 5
+	elif xp < 500:
+		level = 6
+	elif xp < 700:
+		level = 7
+	elif xp < 1000:
+		level = 8
+	else:
+		level = 9
+
+	result = {
+			'xp': xp,
+			'stars': stars,
+			'level': level,
+			'names': names
+		}
+
+
+	return jsonify({'result': result})
+
+
 @app.route('/tasks/<chid>', methods=['GET'])
 def get_tasks(chid):
     print (chid)
@@ -214,6 +264,86 @@ def get_chanswer():
 
 
 	return jsonify({'result': result})
+
+
+@app.route('/users/register', methods=['POST'])
+def register():
+    username = request.get_json()['username']
+    email = request.get_json()['email']
+
+    mycursor.execute("SELECT * FROM Users where email = '" + str(email) + "'")
+    rv = mycursor.fetchone()
+    if rv != None:
+        result = {
+        'username': username,
+        'email': '*'
+        }
+        return jsonify({'result': result})
+
+    password = request.get_json()['password']
+    
+    sql = "INSERT INTO Users (username, password, email) \
+    	VALUES ('" + str(username) + "','" + str(password) + "','" + str(email) + "')"
+    mycursor.execute(sql)
+    mydb.commit()
+
+    result = {
+        'username': username,
+        'email': email
+        }
+
+    return jsonify({'result': result})
+
+
+@app.route('/users/login', methods=['POST'])
+def login():
+	print ('ok')
+	email = request.get_json()['email']
+	password = request.get_json()['password']
+	result = None
+
+	mycursor.execute("""
+		SELECT
+		userid, username, password, email
+		FROM
+		Users
+		WHERE
+		email = %(uemail)s
+		""", {
+		'uemail': email
+		})
+
+	rv = mycursor.fetchone()
+
+	if rv == None or len(rv[2]) == 0:
+	    return result
+
+
+	mycursor.execute("SELECT * FROM Solvedtasks WHERE idUser = '%s' " %(str(rv[0])))
+	rv2 = mycursor.fetchall()
+	stasks = [x[2] for x in rv2]
+
+	mycursor.execute("SELECT * FROM Solvedchallenges WHERE idUser = '%s' " %(str(rv[0])))
+	rv2 = mycursor.fetchall()
+	schallenges = [x[2] for x in rv2]
+
+	print ('***', schallenges)
+
+
+	if rv[2] == password:
+		access_token = create_access_token(
+			identity={
+				'userid': str(rv[0]),
+				'username': rv[1],
+				'email': rv[3],
+				'stasks': stasks,
+				'schallenges': schallenges
+			})
+		result = access_token
+	else:
+		result = None
+
+	return result
 
 
 if __name__ == '__main__':
